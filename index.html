@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FTTH Task Manager</title>
-    <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Google Fonts for Clean Sans -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -14,7 +12,6 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800">
 
-    <!-- Header -->
     <header class="bg-slate-900 text-white shadow-sm border-b border-slate-800">
         <div class="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center space-x-3">
@@ -31,7 +28,6 @@
         </div>
     </header>
 
-    <!-- Loading Spinner -->
     <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-50 transition-all">
         <div class="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center space-y-4 max-w-xs border border-slate-100">
             <div class="animate-spin rounded-full h-9 w-9 border-4 border-blue-600 border-t-transparent"></div>
@@ -39,10 +35,8 @@
         </div>
     </div>
 
-    <!-- Main Content -->
     <main class="container mx-auto px-4 py-6 md:py-8">
         
-        <!-- Live Counters Bar -->
         <section class="grid grid-cols-3 gap-3 md:gap-6 mb-8">
             <div class="bg-white p-4 rounded-xl shadow-xs border border-slate-200/60 flex flex-col sm:flex-row items-center justify-between">
                 <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Ανοιχτά</span>
@@ -60,7 +54,6 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 items-start">
             
-            <!-- Φόρμα -->
             <section class="bg-white p-6 rounded-2xl shadow-xs border border-slate-200/60">
                 <h2 id="formTitle" class="text-lg font-bold text-slate-900 mb-5 pb-3 border-b border-slate-100 flex items-center gap-2">
                     <span>📌</span> Νέο Ticket Εκκρεμότητας
@@ -114,10 +107,8 @@
                 </form>
             </section>
 
-            <!-- Λίστα -->
             <section class="lg:col-span-2 space-y-4">
                 
-                <!-- Φίλτρα & Αναζήτηση -->
                 <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200/60 flex flex-col md:flex-row gap-3 justify-between items-center">
                     <div class="w-full md:w-2/3 relative">
                         <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm">🔍</span>
@@ -133,18 +124,16 @@
                     </div>
                 </div>
 
-                <!-- Container για τα Cards -->
                 <div id="ticketsContainer" class="space-y-4"></div>
             </section>
         </div>
     </main>
 
     <script>
-        // ⚠️ ΑΝΤΙΚΑΤΑΣΤΗΣΕ ΤΟ ΜΕ ΤΟ ΔΙΚΟ ΣΟΥ WEB APP URL
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxh-jXaqhJrvyhyMJsSI6VAJyiI6NIQe7pF9VcS2dQRBnB7hkryKRU350ar-he_CR1MFw/exec";
+        // ⚠️ ΑΝΤΙΚΑΤΑΣΤΗΣΕ ΤΟ ΜΕ ΤΟ ΔΙΚΟ ΣΟΥ NEW WEB APP URL
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzjI5BXqUoyV3a0lwPA1Y2HuwDiZPWygXm0_B9ha8UoVr5EYoaBEfZmgRQeT9_pAwSijw/exec";
 
         let tickets = [];
-        let currentEditingPhotoUrl = ""; // Κρατάει το URL της φωτό κατά το edit
         const loadingOverlay = document.getElementById('loadingOverlay');
 
         async function fetchTickets() {
@@ -251,9 +240,6 @@
             document.getElementById('category').value = ticket.category;
             document.getElementById('description').value = ticket.description;
             
-            // ΚΡΑΤΑΜΕ ΤΟ URL ΤΗΣ ΦΩΤΟΓΡΑΦΙΑΣ ΓΙΑ ΝΑ ΜΗΝ ΧΑΘΕΙ
-            currentEditingPhotoUrl = ticket.photo || "";
-
             if (ticket.priority === 'Low') document.getElementById('prioLow').checked = true;
             if (ticket.priority === 'Medium') document.getElementById('prioMedium').checked = true;
             if (ticket.priority === 'High') document.getElementById('prioHigh').checked = true;
@@ -262,7 +248,7 @@
             document.getElementById('submitBtn').innerText = "Αποθήκευση Αλλαγών";
             document.getElementById('submitBtn').className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-xs transition duration-200 text-sm mt-2 cursor-pointer";
             document.getElementById('cancelEditBtn').classList.remove('hidden');
-            document.getElementById('photoInputContainer').classList.add('hidden');
+            document.getElementById('photoInputContainer').classList.add('hidden'); // Κρύβουμε το input στο edit
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -272,7 +258,6 @@
         function resetForm() {
             document.getElementById('ticketForm').reset();
             document.getElementById('editTicketId').value = "";
-            currentEditingPhotoUrl = ""; 
             document.getElementById('formTitle').innerHTML = "<span>📌</span> Νέο Ticket Εκκρεμότητας";
             document.getElementById('submitBtn').innerText = "Προσθήκη Ticket";
             document.getElementById('submitBtn').className = "w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-xs transition duration-200 text-sm mt-2 cursor-pointer";
@@ -294,25 +279,18 @@
             const editId = document.getElementById('editTicketId').value;
 
             if (editId) {
-                const oldTicket = tickets.find(t => t.id.toString() === editId.toString());
-                
-                const updatedTicket = {
-                    action: "add",
+                // ΚΑΛΕΙ ΤΗ ΝΕΑ ΛΕΙΤΟΥΡΓΙΑ ACTION: "UPDATE" 
+                const updatedFields = {
+                    action: "update",
                     id: editId,
                     address: document.getElementById('address').value,
                     category: document.getElementById('category').value,
                     description: document.getElementById('description').value,
-                    priority: document.querySelector('input[name="priority"]:checked').value,
-                    status: oldTicket ? oldTicket.status : "Ανοιχτό",
-                    date: oldTicket ? oldTicket.date : new Date().toLocaleDateString('el-GR'),
-                    photoData: currentEditingPhotoUrl, // Στέλνουμε το έτοιμο link
-                    photoName: "PRESERVED_URL" // Σήμα ασφαλείας για το Google Script
+                    priority: document.querySelector('input[name="priority"]:checked').value
                 };
 
                 try {
-                    // Στέλνουμε isEdit: true για να ΜΗΝ σβηστεί η φωτό από το Drive κατά την αντικατάσταση
-                    await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: "delete", id: editId, isEdit: true }) });
-                    await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(updatedTicket) });
+                    await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(updatedFields) });
                     resetForm();
                     await fetchTickets();
                 } catch(err) {
@@ -363,8 +341,7 @@
         async function deleteTicket(id) {
             if(confirm("Θέλετε να διαγράψετε οριστικά αυτό το ticket;")) {
                 loadingOverlay.classList.remove('hidden');
-                // Πραγματική διαγραφή, οπότε isEdit: false για να σβήσει και η φωτό από το Drive
-                await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: "delete", id: id, isEdit: false }) });
+                await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: "delete", id: id }) });
                 await fetchTickets();
             }
         }
