@@ -25,8 +25,9 @@
     <main class="container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         <section class="bg-white p-6 rounded-lg shadow-md h-fit">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">Νέο Ticket Εκκρεμότητας</h2>
+            <h2 id="formTitle" class="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">Νέο Ticket Εκκρεμότητας</h2>
             <form id="ticketForm" class="space-y-4">
+                <input type="hidden" id="editTicketId" value="">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Διεύθυνση / Κτίριο</label>
                     <input type="text" id="address" required placeholder="π.χ. Βασιλίσσης Σοφίας 45" class="mt-1 block w-full p-2 border rounded-md text-sm">
@@ -45,19 +46,20 @@
                     <label class="block text-sm font-medium text-gray-700">Περιγραφή & Σημειώσεις</label>
                     <textarea id="description" rows="3" required placeholder="Σημειώσεις προβλήματος..." class="mt-1 block w-full p-2 border rounded-md text-sm"></textarea>
                 </div>
-                <div>
+                <div id="photoInputContainer">
                     <label class="block text-sm font-medium text-gray-700">Φωτογραφία (Κάμερα ή Αρχείο)</label>
                     <input type="file" id="photoInput" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Προτεραιότητα</label>
                     <div class="mt-2 flex space-x-4">
-                        <label><input type="radio" name="priority" value="Low" checked> <span class="text-sm">Χαμηλή</span></label>
-                        <label><input type="radio" name="priority" value="Medium"> <span class="text-sm">Μεσαία</span></label>
-                        <label><input type="radio" name="priority" value="High"> <span class="text-sm text-red-600 font-bold">Επείγον</span></label>
+                        <label><input type="radio" name="priority" value="Low" id="prioLow" checked> <span class="text-sm">Χαμηλή</span></label>
+                        <label><input type="radio" name="priority" value="Medium" id="prioMedium"> <span class="text-sm">Μεσαία</span></label>
+                        <label><input type="radio" name="priority" value="High" id="prioHigh"> <span class="text-sm text-red-600 font-bold">Επείγον</span></label>
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded transition">Προσθήκη Ticket</button>
+                <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded transition">Προσθήκη Ticket</button>
+                <button type="button" id="cancelEditBtn" class="w-full bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 rounded transition hidden">Ακύρωση Επεξεργασίας</button>
             </form>
         </section>
 
@@ -76,7 +78,7 @@
     </main>
 
     <script>
-        // ⚠️ ΑΝΤΙΚΑΤΑΣΤΗΣΕ ΤΟ ΠΑΡΑΚΑΤΩ URL ΜΕ ΑΥΤΟ ΠΟΥ ΑΝΤΕΓΡΑΨΕΣ ΣΤΟ ΒΗΜΑ 2 (Στο τέλος του βήματος 2)
+        // ⚠️ ΑΝΤΙΚΑΤΑΣΤΗΣΕ ΤΟ ΠΑΡΑΚΑΤΩ URL ΜΕ ΤΟ ΔΙΚΟ ΣΟΥ
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyhFLvQagg7LCDv4s43RcEBc8eFpsbUSQuTsRY4InEgcDptav7ORzwRmACGlMhiuh_0TQ/exec";
 
         let tickets = [];
@@ -125,16 +127,53 @@
                         ${photoHTML}
                     </div>
                     <div class="flex justify-between items-center border-t pt-3 mt-2">
-                        <select onchange="updateStatus('${ticket.id}', this.value)" class="text-xs p-1 border rounded bg-white">
-                            <option value="Ανοιχτό" ${ticket.status === 'Ανοιχτό' ? 'selected' : ''}>Ανοιχτό</option>
-                            <option value="Σε Εξέλιξη" ${ticket.status === 'Σε Εξέλιξη' ? 'selected' : ''}>Σε Εξέλιξη</option>
-                            <option value="Κλειστό" ${ticket.status === 'Κλειστό' ? 'selected' : ''}>Κλειστό / Επιλύθηκε</option>
-                        </select>
+                        <div>
+                            <select onchange="updateStatus('${ticket.id}', this.value)" class="text-xs p-1 border rounded bg-white mr-2">
+                                <option value="Ανοιχτό" ${ticket.status === 'Ανοιχτό' ? 'selected' : ''}>Ανοιχτό</option>
+                                <option value="Σε Εξέλιξη" ${ticket.status === 'Σε Εξέλιξη' ? 'selected' : ''}>Σε Εξέλιξη</option>
+                                <option value="Κλειστό" ${ticket.status === 'Κλειστό' ? 'selected' : ''}>Κλειστό / Επιλύθηκε</option>
+                            </select>
+                            <button onclick="startEdit('${ticket.id}')" class="text-xs text-blue-500 hover:text-blue-700 font-semibold mr-2">✏️ Επεξεργασία</button>
+                        </div>
                         <button onclick="deleteTicket('${ticket.id}')" class="text-xs text-red-500 hover:text-red-700 font-semibold">🗑️ Διαγραφή</button>
                     </div>
                 `;
                 container.appendChild(div);
             });
+        }
+
+        function startEdit(id) {
+            const ticket = tickets.find(t => t.id.toString() === id.toString());
+            if (!ticket) return;
+
+            document.getElementById('editTicketId').value = ticket.id;
+            document.getElementById('address').value = ticket.address;
+            document.getElementById('category').value = ticket.category;
+            document.getElementById('description').value = ticket.description;
+            
+            if (ticket.priority === 'Low') document.getElementById('prioLow').checked = true;
+            if (ticket.priority === 'Medium') document.getElementById('prioMedium').checked = true;
+            if (ticket.priority === 'High') document.getElementById('prioHigh').checked = true;
+
+            document.getElementById('formTitle').innerText = "✏️ Επεξεργασία Ticket";
+            document.getElementById('submitBtn').innerText = "Αποθήκευση Αλλαγών";
+            document.getElementById('submitBtn').className = "w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded transition";
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+            document.getElementById('photoInputContainer').classList.add('hidden'); // Κρύβουμε τη φωτό στο edit για ασφάλεια
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
+
+        function resetForm() {
+            document.getElementById('ticketForm').reset();
+            document.getElementById('editTicketId').value = "";
+            document.getElementById('formTitle').innerText = "Νέο Ticket Εκκρεμότητας";
+            document.getElementById('submitBtn').innerText = "Προσθήκη Ticket";
+            document.getElementById('submitBtn').className = "w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded transition";
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+            document.getElementById('photoInputContainer').classList.remove('hidden');
         }
 
         const toBase64 = file => new Promise((resolve, reject) => {
@@ -148,35 +187,71 @@
             e.preventDefault();
             loadingOverlay.classList.remove('hidden');
 
-            const photoFile = document.getElementById('photoInput').files[0];
-            let photoData = "";
-            let photoName = "";
+            const editId = document.getElementById('editTicketId').value;
 
-            if (photoFile) {
-                photoData = await toBase64(photoFile);
-                photoName = photoFile.name;
-            }
+            if (editId) {
+                // Λειτουργία Επεξεργασίας (Edit)
+                // Επειδή το Google Sheet δεν έχει direct update για όλα, θα διαγράψουμε το παλιό και θα γράψουμε το νέο με το ίδιο ID!
+                const oldTicket = tickets.find(t => t.id.toString() === editId.toString());
+                
+                const updatedTicket = {
+                    action: "add",
+                    id: editId,
+                    address: document.getElementById('address').value,
+                    category: document.getElementById('category').value,
+                    description: document.getElementById('description').value,
+                    priority: document.querySelector('input[name="priority"]:checked').value,
+                    status: oldTicket ? oldTicket.status : "Ανοιχτό",
+                    date: oldTicket ? oldTicket.date : new Date().toLocaleDateString('el-GR'),
+                    photoData: "", // Κρατάει την παλιά φωτογραφία στο sheet
+                    photoName: ""
+                };
 
-            const newTicket = {
-                action: "add",
-                id: Date.now().toString(),
-                address: document.getElementById('address').value,
-                category: document.getElementById('category').value,
-                description: document.getElementById('description').value,
-                priority: document.querySelector('input[name="priority"]:checked').value,
-                status: "Ανοιχτό",
-                date: new Date().toLocaleDateString('el-GR'),
-                photoData: photoData,
-                photoName: photoName
-            };
+                try {
+                    // 1. Διαγραφή παλιού από το Sheet
+                    await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: "delete", id: editId }) });
+                    // 2. Προσθήκη ενημερωμένου
+                    await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(updatedTicket) });
+                    
+                    resetForm();
+                    await fetchTickets();
+                } catch(err) {
+                    alert("Σφάλμα κατά την ενημέρωση.");
+                    loadingOverlay.classList.add('hidden');
+                }
 
-            try {
-                await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(newTicket) });
-                document.getElementById('ticketForm').reset();
-                await fetchTickets();
-            } catch(err) {
-                alert("Σφάλμα κατά την αποθήκευση.");
-                loadingOverlay.classList.add('hidden');
+            } else {
+                // Λειτουργία Νέου Ticket
+                const photoFile = document.getElementById('photoInput').files[0];
+                let photoData = "";
+                let photoName = "";
+
+                if (photoFile) {
+                    photoData = await toBase64(photoFile);
+                    photoName = photoFile.name;
+                }
+
+                const newTicket = {
+                    action: "add",
+                    id: Date.now().toString(),
+                    address: document.getElementById('address').value,
+                    category: document.getElementById('category').value,
+                    description: document.getElementById('description').value,
+                    priority: document.querySelector('input[name="priority"]:checked').value,
+                    status: "Ανοιχτό",
+                    date: new Date().toLocaleDateString('el-GR'),
+                    photoData: photoData,
+                    photoName: photoName
+                };
+
+                try {
+                    await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(newTicket) });
+                    document.getElementById('ticketForm').reset();
+                    await fetchTickets();
+                } catch(err) {
+                    alert("Σφάλμα κατά την αποθήκευση.");
+                    loadingOverlay.classList.add('hidden');
+                }
             }
         });
 
