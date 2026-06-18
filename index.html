@@ -3,82 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FTTH Ticket Tracker + Photos</title>
+    <title>FTTH Task Manager</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans min-h-screen">
+<body class="bg-slate-50 min-h-screen text-slate-800">
 
-    <header class="bg-blue-600 text-white p-6 shadow-md">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold tracking-wide">🔌 FTTH Tracker (Με Φωτογραφίες)</h1>
-            <span class="bg-blue-800 px-3 py-1 rounded-full text-sm">Live Google Drive</span>
+    <header class="bg-slate-900 text-white shadow-sm border-b border-slate-800">
+        <div class="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 p-2.5 rounded-xl text-xl shadow-md shadow-blue-500/20">⚡</div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">FTTH Task Manager</h1>
+                    <p class="text-xs text-slate-400">Διαχείριση Εκκρεμοτήτων Δικτύου</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700/50">
+                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-xs font-medium text-slate-300">Σύνδεση: Google Cloud</span>
+            </div>
         </div>
     </header>
 
-    <div id="loadingOverlay" class="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50">
-        <div class="bg-white p-5 rounded-lg shadow-xl flex items-center space-x-3">
-            <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
-            <span class="text-gray-700 font-medium">Επικοινωνία με το Drive... Παρακαλώ περιμένετε...</span>
+    <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-50 transition-all">
+        <div class="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center space-y-4 max-w-xs border border-slate-100">
+            <div class="animate-spin rounded-full h-9 w-9 border-4 border-blue-600 border-t-transparent"></div>
+            <span class="text-slate-600 font-medium text-sm text-center">Συγχρονισμός δεδομένων...</span>
         </div>
     </div>
 
-    <main class="container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <main class="container mx-auto px-4 py-6 md:py-8">
         
-        <section class="bg-white p-6 rounded-lg shadow-md h-fit">
-            <h2 id="formTitle" class="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">Νέο Ticket Εκκρεμότητας</h2>
-            <form id="ticketForm" class="space-y-4">
-                <input type="hidden" id="editTicketId" value="">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Διεύθυνση / Κτίριο</label>
-                    <input type="text" id="address" required placeholder="π.χ. Βασιλίσσης Σοφίας 45" class="mt-1 block w-full p-2 border rounded-md text-sm">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Κατηγορία Προβλήματος</label>
-                    <select id="category" class="mt-1 block w-full p-2 border rounded-md text-sm">
-                        <option value="Σκάψιμο / Χωματουργικά">Σκάψιμο / Χωματουργικά</option>
-                        <option value="Εμφύσηση Ίνας (Blowing)">Εμφύσηση Ίνας (Blowing)</option>
-                        <option value="Κουτί Διακλάδωσης (BEP)">Κουτί Διακλάδωσης (BEP / Floor Box)</option>
-                        <option value="Άδεια Δήμου / Εμπλοκή">Άδεια Δήμου / Εμπλοκή</option>
-                        <option value="Αποκατάσταση Τομής">Αποκατάσταση Τομής</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Περιγραφή & Σημειώσεις</label>
-                    <textarea id="description" rows="3" required placeholder="Σημειώσεις προβλήματος..." class="mt-1 block w-full p-2 border rounded-md text-sm"></textarea>
-                </div>
-                <div id="photoInputContainer">
-                    <label class="block text-sm font-medium text-gray-700">Φωτογραφία (Κάμερα ή Αρχείο)</label>
-                    <input type="file" id="photoInput" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Προτεραιότητα</label>
-                    <div class="mt-2 flex space-x-4">
-                        <label><input type="radio" name="priority" value="Low" id="prioLow" checked> <span class="text-sm">Χαμηλή</span></label>
-                        <label><input type="radio" name="priority" value="Medium" id="prioMedium"> <span class="text-sm">Μεσαία</span></label>
-                        <label><input type="radio" name="priority" value="High" id="prioHigh"> <span class="text-sm text-red-600 font-bold">Επείγον</span></label>
-                    </div>
-                </div>
-                <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded transition">Προσθήκη Ticket</button>
-                <button type="button" id="cancelEditBtn" class="w-full bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 rounded transition hidden">Ακύρωση Επεξεργασίας</button>
-            </form>
+        <section class="grid grid-cols-3 gap-3 md:gap-6 mb-8">
+            <div class="bg-white p-4 rounded-xl shadow-xs border border-slate-200/60 flex flex-col sm:flex-row items-center justify-between">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Ανοιχτά</span>
+                <span id="countOpen" class="text-2xl font-bold text-blue-600 mt-1 sm:mt-0">0</span>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-xs border border-slate-200/60 flex flex-col sm:flex-row items-center justify-between">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Σε Εξέλιξη</span>
+                <span id="countProgress" class="text-2xl font-bold text-amber-500 mt-1 sm:mt-0">0</span>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-xs border border-slate-200/60 flex flex-col sm:flex-row items-center justify-between">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Κλειστά</span>
+                <span id="countClosed" class="text-2xl font-bold text-emerald-600 mt-1 sm:mt-0">0</span>
+            </div>
         </section>
 
-        <section class="lg:col-span-2">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold text-gray-800">Λίστα Εκκρεμοτήτων</h2>
-                <select id="filterStatus" class="p-2 bg-white border rounded-md text-sm">
-                    <option value="all">Όλα τα Tickets</option>
-                    <option value="Ανοιχτό">Μόνο Ανοιχτά</option>
-                    <option value="Σε Εξέλιξη">Σε Εξέλιξη</option>
-                    <option value="Κλειστό">Κλειστά / Επιλυμένα</option>
-                </select>
-            </div>
-            <div id="ticketsContainer" class="space-y-4"></div>
-        </section>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 items-start">
+            
+            <section class="bg-white p-6 rounded-2xl shadow-xs border border-slate-200/60">
+                <h2 id="formTitle" class="text-lg font-bold text-slate-900 mb-5 pb-3 border-b border-slate-100 flex items-center gap-2">
+                    <span>📌</span> Νέο Ticket Εκκρεμότητας
+                </h2>
+                <form id="ticketForm" class="space-y-4">
+                    <input type="hidden" id="editTicketId" value="">
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Διεύθυνση / Κτίριο</label>
+                        <input type="text" id="address" required placeholder="π.χ. Βασιλίσσης Σοφίας 45" class="w-full p-2.5 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Κατηγορία</label>
+                        <select id="category" class="w-full p-2.5 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition">
+                            <option value="Σκάψιμο / Χωματουργικά">Σκάψιμο / Χωματουργικά</option>
+                            <option value="Εμφύσηση Ίνας (Blowing)">Εμφύσηση Ίνας (Blowing)</option>
+                            <option value="Κουτί Διακλάδωσης (BEP)">Κουτί Διακλάδωσης (BEP / Floor Box)</option>
+                            <option value="Άδεια Δήμου / Εμπλοκή">Άδεια Δήμου / Εμπλοκή</option>
+                            <option value="Αποκατάσταση Τομής">Αποκατάσταση Τομής</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Περιγραφή & Σημειώσεις</label>
+                        <textarea id="description" rows="3" required placeholder="Γράψτε λεπτομέρειες ή επικολλήστε link χάρτη..." class="w-full p-2.5 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition"></textarea>
+                    </div>
+                    
+                    <div id="photoInputContainer">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Φωτογραφία Πεδίου</label>
+                        <input type="file" id="photoInput" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition file:cursor-pointer">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Προτεραιότητα</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <label class="border border-slate-200 rounded-lg p-2 flex items-center justify-center space-x-1.5 cursor-pointer hover:bg-slate-50 text-xs font-medium">
+                                <input type="radio" name="priority" value="Low" id="prioLow" checked class="text-blue-600"> <span>Χαμηλή</span>
+                            </label>
+                            <label class="border border-slate-200 rounded-lg p-2 flex items-center justify-center space-x-1.5 cursor-pointer hover:bg-slate-50 text-xs font-medium">
+                                <input type="radio" name="priority" value="Medium" id="prioMedium" class="text-amber-500"> <span>Μεσαία</span>
+                            </label>
+                            <label class="border border-slate-200 rounded-lg p-2 flex items-center justify-center space-x-1.5 cursor-pointer hover:bg-slate-50 text-xs font-medium border-red-200 text-red-700 bg-red-50/10">
+                                <input type="radio" name="priority" value="High" id="prioHigh" class="text-red-600"> <span class="font-bold">Επείγον</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-xs transition duration-200 text-sm mt-2 cursor-pointer">Προσθήκη Ticket</button>
+                    <button type="button" id="cancelEditBtn" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2.5 px-4 rounded-xl transition duration-200 text-sm hidden cursor-pointer">Ακύρωση Επεξεργασίας</button>
+                </form>
+            </section>
+
+            <section class="lg:col-span-2 space-y-4">
+                
+                <div class="bg-white p-4 rounded-2xl shadow-xs border border-slate-200/60 flex flex-col md:flex-row gap-3 justify-between items-center">
+                    <div class="w-full md:w-2/3 relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm">🔍</span>
+                        <input type="text" id="searchBar" placeholder="Αναζήτηση με οδό ή περιγραφή..." class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm bg-slate-50 focus:bg-white outline-none transition focus:ring-2 focus:ring-blue-500/20">
+                    </div>
+                    <div class="w-full md:w-1/3">
+                        <select id="filterStatus" class="w-full p-2 border border-slate-200 rounded-xl text-sm bg-white outline-none transition">
+                            <option value="all">📁 Όλες οι εκκρεμότητες</option>
+                            <option value="Ανοιχτό">🔵 Μόνο Ανοιχτά</option>
+                            <option value="Σε Εξέλιξη">🟡 Σε Εξέλιξη</option>
+                            <option value="Κλειστό">🟢 Κλειστά / Επιλυμένα</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="ticketsContainer" class="space-y-4"></div>
+            </section>
+        </div>
     </main>
 
     <script>
-        // ⚠️ ΑΝΤΙΚΑΤΑΣΤΗΣΕ ΤΟ ΠΑΡΑΚΑΤΩ URL ΜΕ ΤΟ ΔΙΚΟ ΣΟΥ
+        // ⚠️ ΑΝΤΙΚΑΤΑΣΤΗΣΕ ΤΟ ΜΕ ΤΟ ΔΙΚΟ ΣΟΥ WEB APP URL
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyuFy2bT0cIzVdrOXxX-s8eccK_irQ5bzxKX4WDizMfgTgb8SuXSogonL267nJ0YQ6Vlg/exec";
 
         let tickets = [];
@@ -89,6 +141,7 @@
             try {
                 const response = await fetch(WEB_APP_URL);
                 tickets = await response.json();
+                updateCounters();
                 renderTickets();
             } catch (error) {
                 alert("Σφάλμα σύνδεσης με τη βάση δεδομένων.");
@@ -96,46 +149,83 @@
             loadingOverlay.classList.add('hidden');
         }
 
+        function updateCounters() {
+            document.getElementById('countOpen').innerText = tickets.filter(t => t.status === 'Ανοιχτό').length;
+            document.getElementById('countProgress').innerText = tickets.filter(t => t.status === 'Σε Εξέλιξη').length;
+            document.getElementById('countClosed').innerText = tickets.filter(t => t.status === 'Κλειστό').length;
+        }
+
         function renderTickets() {
             const container = document.getElementById('ticketsContainer');
             container.innerHTML = '';
+            
             const filterValue = document.getElementById('filterStatus').value;
+            const searchQuery = document.getElementById('searchBar').value.toLowerCase();
 
-            const filtered = tickets.filter(t => filterValue === 'all' || t.status === filterValue);
+            const filtered = tickets.filter(t => {
+                const matchesStatus = (filterValue === 'all' || t.status === filterValue);
+                const matchesSearch = (t.address.toLowerCase().includes(searchQuery) || t.description.toLowerCase().includes(searchQuery));
+                return matchesStatus && matchesSearch;
+            });
 
             if (filtered.length === 0) {
-                container.innerHTML = `<p class="text-gray-500 italic text-center bg-white p-6 rounded-lg shadow-sm">Δεν βρέθηκαν εκκρεμότητες.</p>`;
+                container.innerHTML = `
+                    <div class="text-center bg-white p-8 rounded-2xl border border-slate-200/60 shadow-xs">
+                        <span class="text-3xl">☕</span>
+                        <p class="text-slate-400 text-sm font-medium mt-2">Δεν βρέθηκαν εκκρεμότητες με αυτά τα κριτήρια.</p>
+                    </div>`;
                 return;
             }
 
             filtered.forEach(ticket => {
-                let pClass = ticket.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' : (ticket.priority === 'High' ? 'bg-red-100 text-red-800 font-bold' : 'bg-blue-100 text-blue-800');
+                let pBadge = "";
+                if (ticket.priority === 'High') {
+                    pBadge = '<span class="text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-0.5 rounded-md bg-red-50 text-red-600 border border-red-100">Επείγον</span>';
+                } else if (ticket.priority === 'Medium') {
+                    pBadge = '<span class="text-[10px] uppercase tracking-wider font-semibold px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-600 border border-amber-100">Μεσαία</span>';
+                } else {
+                    pBadge = '<span class="text-[10px] uppercase tracking-wider font-semibold px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-600">Χαμηλή</span>';
+                }
+
+                // Έξυπνη εύρεση Link για Maps στην περιγραφή
+                let mapsButtonHTML = "";
+                const urlRegex = /(https?:\/\/[^\s]+)/g;
+                const matches = ticket.description.match(urlRegex);
+                if (matches) {
+                    mapsButtonHTML = `<a href="${matches[0]}" target="_blank" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded-lg font-medium inline-flex items-center gap-1 transition mt-2">📍 Google Maps</a>`;
+                }
                 
-                let photoHTML = "";
+                let photoButtonHTML = "";
                 if(ticket.photo) {
-                    photoHTML = `<div class="mt-3"><a href="${ticket.photo}" target="_blank" class="inline-flex items-center text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded hover:bg-blue-100 transition">📸 Προβολή Φωτογραφίας Πεδίου</a></div>`;
+                    photoButtonHTML = `<a href="${ticket.photo}" target="_blank" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-1 rounded-lg font-semibold inline-flex items-center gap-1 transition mt-2">📸 Φωτογραφία</a>`;
                 }
 
                 const div = document.createElement('div');
-                div.className = `bg-white p-5 rounded-lg shadow-md border-l-4 ${ticket.priority === 'High' ? 'border-red-500' : 'border-blue-500'}`;
+                div.className = "bg-white p-5 rounded-2xl shadow-xs border border-slate-200/60 flex flex-col justify-between hover:border-slate-300 transition duration-150";
                 div.innerHTML = `
-                    <div class="mb-4">
-                        <div class="flex justify-between items-start"><span class="text-xs px-2 py-1 rounded ${pClass}">Προτεραιότητα: ${ticket.priority}</span><span class="text-xs text-gray-500">${ticket.date}</span></div>
-                        <h3 class="text-lg font-bold text-gray-900 mt-2">${ticket.address}</h3>
-                        <p class="text-sm font-medium text-blue-600 mt-1">🔧 ${ticket.category}</p>
-                        <p class="text-gray-600 text-sm mt-2 bg-gray-50 p-2 rounded border border-gray-100 whitespace-pre-line">${ticket.description}</p>
-                        ${photoHTML}
-                    </div>
-                    <div class="flex justify-between items-center border-t pt-3 mt-2">
-                        <div>
-                            <select onchange="updateStatus('${ticket.id}', this.value)" class="text-xs p-1 border rounded bg-white mr-2">
-                                <option value="Ανοιχτό" ${ticket.status === 'Ανοιχτό' ? 'selected' : ''}>Ανοιχτό</option>
-                                <option value="Σε Εξέλιξη" ${ticket.status === 'Σε Εξέλιξη' ? 'selected' : ''}>Σε Εξέλιξη</option>
-                                <option value="Κλειστό" ${ticket.status === 'Κλειστό' ? 'selected' : ''}>Κλειστό / Επιλύθηκε</option>
-                            </select>
-                            <button onclick="startEdit('${ticket.id}')" class="text-xs text-blue-500 hover:text-blue-700 font-semibold mr-2">✏️ Επεξεργασία</button>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            ${pBadge}
+                            <span class="text-xs text-slate-400 font-medium">${ticket.date}</span>
                         </div>
-                        <button onclick="deleteTicket('${ticket.id}')" class="text-xs text-red-500 hover:text-red-700 font-semibold">🗑️ Διαγραφή</button>
+                        <h3 class="text-base font-bold text-slate-900 tracking-tight">${ticket.address}</h3>
+                        <p class="text-xs font-semibold text-blue-600 mt-0.5">🔧 ${ticket.category}</p>
+                        <p class="text-slate-600 text-sm mt-3 bg-slate-50/50 border border-slate-100 p-3 rounded-xl whitespace-pre-line leading-relaxed">${ticket.description}</p>
+                        <div class="flex flex-wrap gap-2">${photoButtonHTML} ${mapsButtonHTML}</div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center border-t border-slate-100 pt-4 mt-4 gap-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-400 font-medium hidden sm:inline">Κατάσταση:</span>
+                            <select onchange="updateStatus('${ticket.id}', this.value)" class="text-xs p-1.5 border border-slate-200 rounded-lg bg-white font-medium outline-none">
+                                <option value="Ανοιχτό" ${ticket.status === 'Ανοιχτό' ? 'selected' : ''}>🔵 Ανοιχτό</option>
+                                <option value="Σε Εξέλιξη" ${ticket.status === 'Σε Εξέλιξη' ? 'selected' : ''}>🟡 Σε Εξέλιξη</option>
+                                <option value="Κλειστό" ${ticket.status === 'Κλειστό' ? 'selected' : ''}>🟢 Κλειστό</option>
+                            </select>
+                        </div>
+                        <div class="flex justify-end gap-4">
+                            <button onclick="startEdit('${ticket.id}')" class="text-xs text-slate-500 hover:text-blue-600 font-medium flex items-center gap-1 cursor-pointer transition">✏️ Edit</button>
+                            <button onclick="deleteTicket('${ticket.id}')" class="text-xs text-slate-400 hover:text-red-600 font-medium flex items-center gap-1 cursor-pointer transition">🗑️ Delete</button>
+                        </div>
                     </div>
                 `;
                 container.appendChild(div);
@@ -155,11 +245,11 @@
             if (ticket.priority === 'Medium') document.getElementById('prioMedium').checked = true;
             if (ticket.priority === 'High') document.getElementById('prioHigh').checked = true;
 
-            document.getElementById('formTitle').innerText = "✏️ Επεξεργασία Ticket";
+            document.getElementById('formTitle').innerHTML = "<span>✏️</span> Επεξεργασία Ticket";
             document.getElementById('submitBtn').innerText = "Αποθήκευση Αλλαγών";
-            document.getElementById('submitBtn').className = "w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded transition";
+            document.getElementById('submitBtn').className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-xs transition duration-200 text-sm mt-2 cursor-pointer";
             document.getElementById('cancelEditBtn').classList.remove('hidden');
-            document.getElementById('photoInputContainer').classList.add('hidden'); // Κρύβουμε τη φωτό στο edit για ασφάλεια
+            document.getElementById('photoInputContainer').classList.add('hidden');
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -169,9 +259,9 @@
         function resetForm() {
             document.getElementById('ticketForm').reset();
             document.getElementById('editTicketId').value = "";
-            document.getElementById('formTitle').innerText = "Νέο Ticket Εκκρεμότητας";
+            document.getElementById('formTitle').innerHTML = "<span>📌</span> Νέο Ticket Εκκρεμότητας";
             document.getElementById('submitBtn').innerText = "Προσθήκη Ticket";
-            document.getElementById('submitBtn').className = "w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded transition";
+            document.getElementById('submitBtn').className = "w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-xs transition duration-200 text-sm mt-2 cursor-pointer";
             document.getElementById('cancelEditBtn').classList.add('hidden');
             document.getElementById('photoInputContainer').classList.remove('hidden');
         }
@@ -190,8 +280,6 @@
             const editId = document.getElementById('editTicketId').value;
 
             if (editId) {
-                // Λειτουργία Επεξεργασίας (Edit)
-                // Επειδή το Google Sheet δεν έχει direct update για όλα, θα διαγράψουμε το παλιό και θα γράψουμε το νέο με το ίδιο ID!
                 const oldTicket = tickets.find(t => t.id.toString() === editId.toString());
                 
                 const updatedTicket = {
@@ -203,16 +291,13 @@
                     priority: document.querySelector('input[name="priority"]:checked').value,
                     status: oldTicket ? oldTicket.status : "Ανοιχτό",
                     date: oldTicket ? oldTicket.date : new Date().toLocaleDateString('el-GR'),
-                    photoData: "", // Κρατάει την παλιά φωτογραφία στο sheet
+                    photoData: "", 
                     photoName: ""
                 };
 
                 try {
-                    // 1. Διαγραφή παλιού από το Sheet
                     await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: "delete", id: editId }) });
-                    // 2. Προσθήκη ενημερωμένου
                     await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(updatedTicket) });
-                    
                     resetForm();
                     await fetchTickets();
                 } catch(err) {
@@ -221,7 +306,6 @@
                 }
 
             } else {
-                // Λειτουργία Νέου Ticket
                 const photoFile = document.getElementById('photoInput').files[0];
                 let photoData = "";
                 let photoName = "";
@@ -270,6 +354,7 @@
         }
 
         document.getElementById('filterStatus').addEventListener('change', renderTickets);
+        document.getElementById('searchBar').addEventListener('input', renderTickets);
         fetchTickets();
     </script>
 </body>
