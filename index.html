@@ -3,17 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FTTH Ticket Tracker</title>
+    <title>FTTH Ticket Tracker + Photos</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 <body class="bg-gray-100 font-sans min-h-screen">
 
     <header class="bg-blue-600 text-white p-6 shadow-md">
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold tracking-wide">🔌 FTTH Project Ticket Tracker</h1>
-            <span class="bg-blue-800 px-3 py-1 rounded-full text-sm">Έργο: FTTH_Zone_A</span>
+            <h1 class="text-2xl font-bold tracking-wide">🔌 FTTH Tracker (Με Φωτογραφίες)</h1>
+            <span class="bg-blue-800 px-3 py-1 rounded-full text-sm">Live Google Drive</span>
         </div>
     </header>
+
+    <div id="loadingOverlay" class="fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50">
+        <div class="bg-white p-5 rounded-lg shadow-xl flex items-center space-x-3">
+            <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+            <span class="text-gray-700 font-medium">Επικοινωνία με το Drive... Παρακαλώ περιμένετε...</span>
+        </div>
+    </div>
 
     <main class="container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         
@@ -22,13 +29,11 @@
             <form id="ticketForm" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Διεύθυνση / Κτίριο</label>
-                    <input type="text" id="address" required placeholder="π.χ. Βασιλίσσης Σοφίας 45, Αθήνα" 
-                        class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm">
+                    <input type="text" id="address" required placeholder="π.χ. Βασιλίσσης Σοφίας 45" class="mt-1 block w-full p-2 border rounded-md text-sm">
                 </div>
-
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Κατηγορία Προβλήματος</label>
-                    <select id="category" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm">
+                    <select id="category" class="mt-1 block w-full p-2 border rounded-md text-sm">
                         <option value="Σκάψιμο / Χωματουργικά">Σκάψιμο / Χωματουργικά</option>
                         <option value="Εμφύσηση Ίνας (Blowing)">Εμφύσηση Ίνας (Blowing)</option>
                         <option value="Κουτί Διακλάδωσης (BEP)">Κουτί Διακλάδωσης (BEP / Floor Box)</option>
@@ -36,188 +41,161 @@
                         <option value="Αποκατάσταση Τομής">Αποκατάσταση Τομής</option>
                     </select>
                 </div>
-
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Περιγραφή & Σημειώσεις</label>
-                    <textarea id="description" rows="3" required placeholder="π.χ. Σκληρό υπέδαφος, χρειάζεται κομπρεσέρ ή υπάρχει άρνηση ιδιοκτήτη..." 
-                        class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-sm"></textarea>
+                    <textarea id="description" rows="3" required placeholder="Σημειώσεις προβλήματος..." class="mt-1 block w-full p-2 border rounded-md text-sm"></textarea>
                 </div>
-
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Φωτογραφία (Κάμερα ή Αρχείο)</label>
+                    <input type="file" id="photoInput" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Προτεραιότητα</label>
                     <div class="mt-2 flex space-x-4">
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="priority" value="Low" checked class="text-blue-600">
-                            <span class="ml-2 text-sm text-gray-700">Χαμηλή</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="priority" value="Medium" class="text-blue-600">
-                            <span class="ml-2 text-sm text-gray-700">Μεσαία</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="priority" value="High" class="text-blue-600">
-                            <span class="ml-2 text-sm text-gray-700 text-red-600 font-bold">Επείγον</span>
-                        </label>
+                        <label><input type="radio" name="priority" value="Low" checked> <span class="text-sm">Χαμηλή</span></label>
+                        <label><input type="radio" name="priority" value="Medium"> <span class="text-sm">Μεσαία</span></label>
+                        <label><input type="radio" name="priority" value="High"> <span class="text-sm text-red-600 font-bold">Επείγον</span></label>
                     </div>
                 </div>
-
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200">
-                    Προσθήκη Ticket
-                </button>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded transition">Προσθήκη Ticket</button>
             </form>
         </section>
 
         <section class="lg:col-span-2">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-semibold text-gray-800">Λίστα Εκκρεμοτήτων</h2>
-                <select id="filterStatus" class="p-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm">
+                <select id="filterStatus" class="p-2 bg-white border rounded-md text-sm">
                     <option value="all">Όλα τα Tickets</option>
                     <option value="Ανοιχτό">Μόνο Ανοιχτά</option>
                     <option value="Σε Εξέλιξη">Σε Εξέλιξη</option>
                     <option value="Κλειστό">Κλειστά / Επιλυμένα</option>
                 </select>
             </div>
-
-            <div id="ticketsContainer" class="space-y-4">
-                </div>
+            <div id="ticketsContainer" class="space-y-4"></div>
         </section>
     </main>
 
     <script>
-        // Αρχικά δεδομένα (Mock Data) για να μην είναι άδεια η σελίδα
-        let tickets = [
-            {
-                id: 1,
-                address: "Ακαδημίας 12, Αθήνα",
-                category: "Σκάψιμο / Χωματουργικά",
-                description: "Εμπόδιο από ρίζες δέντρου. Αναμονή για έγκριση από το πράσινο.",
-                priority: "Medium",
-                status: "Σε Εξέλιξη",
-                date: "18/06/2026"
-            },
-            {
-                id: 2,
-                address: "Κηφισίας 100, Αμπελόκηποι",
-                category: "Άδεια Δήμου / Εμπλοκή",
-                description: "Δεν έχει εκδοθεί η άδεια τομής από τον Δήμο για το συγκεκριμένο οικοδομικό τετράγωνο.",
-                priority: "High",
-                status: "Ανοιχτό",
-                date: "17/06/2026"
+        // ⚠️ ΑΝΤΙΚΑΤΑΣΤΗΣΕ ΤΟ ΠΑΡΑΚΑΤΩ URL ΜΕ ΑΥΤΟ ΠΟΥ ΑΝΤΕΓΡΑΨΕΣ ΣΤΟ ΒΗΜΑ 2 (Στο τέλος του βήματος 2)
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyCLwPC0c_6263fvPelf0baavsot9cHnTACOIFf3s42f6dc5C7vD92glsqEPTOnN7vBjw/exec";
+
+        let tickets = [];
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        async function fetchTickets() {
+            loadingOverlay.classList.remove('hidden');
+            try {
+                const response = await fetch(WEB_APP_URL);
+                tickets = await response.json();
+                renderTickets();
+            } catch (error) {
+                alert("Σφάλμα σύνδεσης με τη βάση δεδομένων.");
             }
-        ];
+            loadingOverlay.classList.add('hidden');
+        }
 
-        const ticketForm = document.getElementById('ticketForm');
-        const ticketsContainer = document.getElementById('ticketsContainer');
-        const filterStatus = document.getElementById('filterStatus');
-
-        // Συναρτήση για την εμφάνιση των tickets
         function renderTickets() {
-            ticketsContainer.innerHTML = '';
-            const filterValue = filterStatus.value;
+            const container = document.getElementById('ticketsContainer');
+            container.innerHTML = '';
+            const filterValue = document.getElementById('filterStatus').value;
 
-            const filteredTickets = tickets.filter(ticket => {
-                if (filterValue === 'all') return true;
-                return ticket.status === filterValue;
-            });
+            const filtered = tickets.filter(t => filterValue === 'all' || t.status === filterValue);
 
-            if (filteredTickets.length === 0) {
-                ticketsContainer.innerHTML = `<p class="text-gray-500 italic text-center bg-white p-6 rounded-lg shadow-sm">Δεν βρέθηκαν εκκρεμότητες.</p>`;
+            if (filtered.length === 0) {
+                container.innerHTML = `<p class="text-gray-500 italic text-center bg-white p-6 rounded-lg shadow-sm">Δεν βρέθηκαν εκκρεμότητες.</p>`;
                 return;
             }
 
-            filteredTickets.forEach(ticket => {
-                // Χρώμα Προτεραιότητας
-                let priorityClass = 'bg-blue-100 text-blue-800';
-                if (ticket.priority === 'Medium') priorityClass = 'bg-yellow-100 text-yellow-800';
-                if (ticket.priority === 'High') priorityClass = 'bg-red-100 text-red-800 font-bold';
-
-                // Χρώμα Κατάστασης (Status)
-                let statusClass = 'bg-gray-200 text-gray-800';
-                if (ticket.status === 'Σε Εξέλιξη') statusClass = 'bg-orange-100 text-orange-800';
-                if (ticket.status === 'Κλειστό') statusClass = 'bg-green-100 text-green-800 line-through';
-
-                const ticketEl = document.createElement('div');
-                ticketEl.className = `bg-white p-5 rounded-lg shadow-md border-l-4 ${ticket.priority === 'High' ? 'border-red-500' : 'border-blue-500'} flex flex-col justify-between`;
+            filtered.forEach(ticket => {
+                let pClass = ticket.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' : (ticket.priority === 'High' ? 'bg-red-100 text-red-800 font-bold' : 'bg-blue-100 text-blue-800');
                 
-                ticketEl.innerHTML = `
+                let photoHTML = "";
+                if(ticket.photo) {
+                    photoHTML = `<div class="mt-3"><a href="${ticket.photo}" target="_blank" class="inline-flex items-center text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded hover:bg-blue-100 transition">📸 Προβολή Φωτογραφίας Πεδίου</a></div>`;
+                }
+
+                const div = document.createElement('div');
+                div.className = `bg-white p-5 rounded-lg shadow-md border-l-4 ${ticket.priority === 'High' ? 'border-red-500' : 'border-blue-500'}`;
+                div.innerHTML = `
                     <div class="mb-4">
-                        <div class="flex justify-between items-start flex-wrap gap-2">
-                            <span class="text-xs font-semibold px-2 py-1 rounded ${priorityClass}">Προτεραιότητα: ${ticket.priority}</span>
-                            <span class="text-xs text-gray-500">${ticket.date}</span>
-                        </div>
+                        <div class="flex justify-between items-start"><span class="text-xs px-2 py-1 rounded ${pClass}">Προτεραιότητα: ${ticket.priority}</span><span class="text-xs text-gray-500">${ticket.date}</span></div>
                         <h3 class="text-lg font-bold text-gray-900 mt-2">${ticket.address}</h3>
                         <p class="text-sm font-medium text-blue-600 mt-1">🔧 ${ticket.category}</p>
-                        <p class="text-gray-600 text-sm mt-2 bg-gray-50 p-2 rounded border border-gray-100">${ticket.description}</p>
+                        <p class="text-gray-600 text-sm mt-2 bg-gray-50 p-2 rounded border border-gray-100 whitespace-pre-line">${ticket.description}</p>
+                        ${photoHTML}
                     </div>
-                    <div class="flex justify-between items-center border-t pt-3 mt-2 flex-wrap gap-2">
-                        <div>
-                            <label class="text-xs text-gray-500 block">Κατάσταση</label>
-                            <select onchange="updateStatus(${ticket.id}, this.value)" class="text-xs p-1 border rounded bg-white mt-1">
-                                <option value="Ανοιχτό" ${ticket.status === 'Ανοιχτό' ? 'selected' : ''}>Ανοιχτό</option>
-                                <option value="Σε Εξέλιξη" ${ticket.status === 'Σε Εξέλιξη' ? 'selected' : ''}>Σε Εξέλιξη</option>
-                                <option value="Κλειστό" ${ticket.status === 'Κλειστό' ? 'selected' : ''}>Κλειστό / Επιλύθηκε</option>
-                            </select>
-                        </div>
-                        <button onclick="deleteTicket(${ticket.id})" class="text-xs text-red-500 hover:text-red-700 font-semibold">
-                            🗑️ Διαγραφή
-                        </button>
+                    <div class="flex justify-between items-center border-t pt-3 mt-2">
+                        <select onchange="updateStatus('${ticket.id}', this.value)" class="text-xs p-1 border rounded bg-white">
+                            <option value="Ανοιχτό" ${ticket.status === 'Ανοιχτό' ? 'selected' : ''}>Ανοιχτό</option>
+                            <option value="Σε Εξέλιξη" ${ticket.status === 'Σε Εξέλιξη' ? 'selected' : ''}>Σε Εξέλιξη</option>
+                            <option value="Κλειστό" ${ticket.status === 'Κλειστό' ? 'selected' : ''}>Κλειστό / Επιλύθηκε</option>
+                        </select>
+                        <button onclick="deleteTicket('${ticket.id}')" class="text-xs text-red-500 hover:text-red-700 font-semibold">🗑️ Διαγραφή</button>
                     </div>
                 `;
-                ticketsContainer.appendChild(ticketEl);
+                container.appendChild(div);
             });
         }
 
-        // Προσθήκη Νέου Ticket
-        ticketForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const address = document.getElementById('address').value;
-            const category = document.getElementById('category').value;
-            const description = document.getElementById('description').value;
-            const priority = document.querySelector('input[name="priority"]:checked').value;
-            
-            const today = new Date();
-            const dateStr = today.toLocaleDateString('el-GR');
-
-            const newTicket = {
-                id: Date.now(), // Μοναδικό ID με βάση το χρόνο
-                address,
-                category,
-                description,
-                priority,
-                status: "Ανοιχτό",
-                date: dateStr
-            };
-
-            tickets.unshift(newTicket); // Προσθήκη στην αρχή της λίστας
-            ticketForm.reset(); // Καθαρισμός φόρμας
-            renderTickets();
+        const toBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
         });
 
-        // Ενημέρωση Κατάστασης (Status)
-        function updateStatus(id, newStatus) {
-            tickets = tickets.map(ticket => {
-                if (ticket.id === id) {
-                    return { ...ticket, status: newStatus };
-                }
-                return ticket;
-            });
-            renderTickets();
+        document.getElementById('ticketForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            loadingOverlay.classList.remove('hidden');
+
+            const photoFile = document.getElementById('photoInput').files[0];
+            let photoData = "";
+            let photoName = "";
+
+            if (photoFile) {
+                photoData = await toBase64(photoFile);
+                photoName = photoFile.name;
+            }
+
+            const newTicket = {
+                action: "add",
+                id: Date.now().toString(),
+                address: document.getElementById('address').value,
+                category: document.getElementById('category').value,
+                description: document.getElementById('description').value,
+                priority: document.querySelector('input[name="priority"]:checked').value,
+                status: "Ανοιχτό",
+                date: new Date().toLocaleDateString('el-GR'),
+                photoData: photoData,
+                photoName: photoName
+            };
+
+            try {
+                await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(newTicket) });
+                document.getElementById('ticketForm').reset();
+                await fetchTickets();
+            } catch(err) {
+                alert("Σφάλμα κατά την αποθήκευση.");
+                loadingOverlay.classList.add('hidden');
+            }
+        });
+
+        async function updateStatus(id, newStatus) {
+            loadingOverlay.classList.remove('hidden');
+            await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: "updateStatus", id: id, status: newStatus }) });
+            await fetchTickets();
         }
 
-        // Διαγραφή Ticket
-        function deleteTicket(id) {
-            if(confirm("Είσαι σίγουρος ότι θέλεις να διαγράψεις αυτό το ticket;")) {
-                tickets = tickets.filter(ticket => ticket.id !== id);
-                renderTickets();
+        async function deleteTicket(id) {
+            if(confirm("Θέλετε να διαγράψετε οριστικά αυτό το ticket;")) {
+                loadingOverlay.classList.remove('hidden');
+                await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: "delete", id: id }) });
+                await fetchTickets();
             }
         }
 
-        // Event Listener για το Φίλτρο
-        filterStatus.addEventListener('change', renderTickets);
-
-        // Αρχικό "τρέξιμο" για να εμφανιστούν τα mock data
-        renderTickets();
+        document.getElementById('filterStatus').addEventListener('change', renderTickets);
+        fetchTickets();
     </script>
 </body>
 </html>
